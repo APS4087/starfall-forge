@@ -2,6 +2,8 @@
 
 A small WebGPU timing and heat-management game about forging a blade from a fallen star.
 
+[Play Starfall Forge](https://aps4087.github.io/starfall-forge/)
+
 ## Forge run
 
 [![Watch a short Starfall Forge run](./media/starfall-forge-demo.jpg)](./media/starfall-forge-demo.mp4)

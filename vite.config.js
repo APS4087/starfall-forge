@@ -2,8 +2,9 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 export default {
+    base: process.env.DEPLOY_BASE_PATH || '/',
     root: 'src/',
-    publicDir: '../static/',
+    publicDir: false,
     server:
     {
         host: '127.0.0.1'
