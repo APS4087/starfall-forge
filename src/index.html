@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#070711">
+    <meta name="description" content="Starfall Forge — a tiny WebGPU and TSL timing game.">
+    <title>Starfall Forge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <canvas class="threejs" aria-label="Interactive 3D forge"></canvas>
+
+    <div class="vignette" aria-hidden="true"></div>
+
+    <header class="brand">
+        <div class="brand__mark" aria-hidden="true"><span>✦</span></div>
+        <div class="brand__copy">
+            <h1>Starfall Forge</h1>
+            <p>Celestial works / 01</p>
+        </div>
+    </header>
+
+    <div class="sound-status" data-sound-status><span></span> Audio online</div>
+
+    <section class="loading" data-loading aria-live="polite">
+        <div class="loading__star">✦</div>
+        <p>Calling down the forge…</p>
+    </section>
+
+    <section class="panel panel--intro" data-start-panel>
+        <div class="panel__index">
+            <span>Mission 01</span>
+            <span>Celestial tempering</span>
+        </div>
+        <h2>Forge the<br><em>fallen star.</em></h2>
+        <p class="panel__copy">Catch the comet in the strike window. Build a clean rhythm and keep the core inside its ideal heat band.</p>
+
+        <div class="mission-line">
+            <div><span>Target</span><strong>100% blade</strong></div>
+            <div><span>Window</span><strong>30 seconds</strong></div>
+            <div><span>Input</span><strong>Space / tap</strong></div>
+        </div>
+
+        <button class="primary-button" data-start-button>
+            <span class="primary-button__glyph" aria-hidden="true">✦</span>
+            <span class="primary-button__copy"><strong>Ignite the forge</strong><small>Start the 30-second run</small></span>
+            <span class="primary-button__arrow" aria-hidden="true">→</span>
+        </button>
+    </section>
+
+    <main class="hud is-hidden" data-hud aria-live="polite">
+        <section class="hud__clock">
+            <span>Orbit closes in</span>
+            <strong data-time>30.0</strong>
+            <small>seconds</small>
+        </section>
+
+        <section class="hud__stats">
+            <div class="stat">
+                <span class="stat__label">Score</span>
+                <span class="stat__value" data-score>0000</span>
+            </div>
+            <div class="stat stat--combo">
+                <span class="stat__label">Streak</span>
+                <span class="stat__value"><span data-combo>0</span><small>×</small></span>
+            </div>
+        </section>
+
+        <section class="meters">
+            <div class="meters__heading">
+                <span>Forge telemetry</span>
+                <span>Live</span>
+            </div>
+            <div class="meter-row">
+                <div class="meter-row__header">
+                    <span>Blade integrity</span>
+                    <span data-progress-label>0%</span>
+                </div>
+                <div class="meter meter--progress">
+                    <div class="meter__fill" data-progress-fill></div>
+                </div>
+            </div>
+
+            <div class="meter-row">
+                <div class="meter-row__header">
+                    <span>Core temperature</span>
+                    <span data-heat-label>32%</span>
+                </div>
+                <div class="meter meter--heat">
+                    <div class="meter__ideal" aria-label="Ideal heat range"></div>
+                    <div class="meter__fill" data-heat-fill></div>
+                </div>
+                <div class="meter__legend"><span>Cold</span><span>Ideal band</span><span>Critical</span></div>
+            </div>
+        </section>
+    </main>
+
+    <section class="strike-console is-hidden" data-strike-console>
+        <div class="strike-console__topline">
+            <div class="feedback" data-feedback>Watch the comet…</div>
+            <div class="strike-console__key"><kbd>Space</kbd><span>or tap</span></div>
+        </div>
+        <div class="timing">
+            <div class="timing__track">
+                <div class="timing__ticks" aria-hidden="true"></div>
+                <div class="timing__sweet" data-sweet-zone></div>
+                <div class="timing__marker" data-marker>
+                    <span>✦</span>
+                </div>
+            </div>
+            <div class="timing__labels">
+                <span>Early</span>
+                <strong>Strike window</strong>
+                <span>Late</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel panel--result is-hidden" data-result-panel aria-live="assertive">
+        <div class="panel__index">
+            <span data-result-kicker>Commission complete</span>
+            <span>Run summary</span>
+        </div>
+        <h2 data-result-title>A star is born.</h2>
+        <p class="panel__copy" data-result-copy>The blade holds a clean celestial edge.</p>
+        <div class="result-ledger">
+            <div class="result-score"><small>Final score</small><span data-final-score>0000</span></div>
+            <div class="best-score"><small>Personal best</small><strong data-best-score>0000</strong></div>
+        </div>
+        <button class="primary-button" data-restart-button>
+            <span class="primary-button__glyph" aria-hidden="true">↻</span>
+            <span class="primary-button__copy"><strong>Forge another</strong><small>Return to the anvil</small></span>
+            <span class="primary-button__arrow" aria-hidden="true">→</span>
+        </button>
+    </section>
+
+    <p class="sr-only" data-announcement aria-live="assertive"></p>
+
+    <script type="module" src="./script.js"></script>
+</body>
+</html>
