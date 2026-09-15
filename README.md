@@ -6,9 +6,9 @@ A small WebGPU timing and heat-management game about forging a blade from a fall
 
 ## Forge run
 
-[![Watch a short Starfall Forge run](./media/starfall-forge-demo.jpg)](./media/starfall-forge-demo.mp4)
+https://github.com/user-attachments/assets/a18ef217-0785-47ad-9dcb-0dc32ae820bd
 
-_Click the preview for the short, optimized video._
+_An 11-second, GitHub-optimized forging run._
 
 ## Play
 
