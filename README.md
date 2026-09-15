@@ -40,7 +40,7 @@ The lesson's demo becomes a 30-second game with:
 
 | Lesson idea | Where it appears here | Why it matters to the game |
 | --- | --- | --- |
-| Code-native scene parts | `hammer`, `blade` and `forge` in `src/script.js` | Keeps gameplay pieces directly animatable and the public project self-contained. |
+| Loaded scene parts | `hammer` and `blade` from `static/anvil.glb` | Reuses the lesson model while keeping the gameplay pieces directly animatable. |
 | TSL emissive heat field | `blade.material.emissiveNode` | Heat and impact position become visible on the blade. |
 | Animated point light | `impactLight` | Gives each strike immediate physical presence. |
 | Storage buffers + compute | `sparkExplosion` and `sparkUpdate` | Thousands of bouncing sparks remain practical. |
@@ -58,10 +58,10 @@ src/script.js    procedural scene, TSL effects and game loop
 media/           optimized README demo and poster
 ```
 
-### Asset note
+### Course asset note
 
-All visuals in this public version—including the forge, hammer, blade, floor and celestial details—are generated from original Three.js geometry and materials in `src/script.js`. No model, texture, image, video or other asset from the paid course is redistributed here.
+The anvil model and floor texture in `static/` come from the supplied final archive for Bruno Simon's Anvil lesson and are included here at the project owner's request for this non-commercial learning experiment. They are not original assets created for Starfall Forge and are not covered by this project's MIT license.
 
 ## License
 
-The original project code and media are available under the [MIT License](./LICENSE). Three.js Journey and its course material remain the property of their respective rights holders.
+The original project code and demo media are available under the [MIT License](./LICENSE). `static/anvil.glb`, `static/floor-color.jpg`, Three.js Journey and its course material remain the property of their respective rights holders.

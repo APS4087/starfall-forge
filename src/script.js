@@ -1,14 +1,16 @@
 import * as THREE from 'three/webgpu'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import {
     color,
     deltaTime,
     Fn,
+    grayscale,
     hash,
     If,
     instancedArray,
     instanceIndex,
+    materialColor,
     mix,
     mul,
     pass,
@@ -25,8 +27,8 @@ import {
  *
  * The visual ideas are deliberately close to the Anvil lesson: an animated
  * hammer, a TSL emissive heat field, a brief point-light flash, GPU-computed
- * sparks, bloom and easing in the animation loop. The model and environment
- * below are original code-native geometry built for this learning project.
+ * sparks, bloom and easing in the animation loop. The anvil model and floor
+ * texture are loaded from the supplied lesson archive.
  */
 
 const $ = (selector) => document.querySelector(selector)
@@ -136,14 +138,18 @@ renderPipeline.outputNode = sceneColor.add(bloomPass)
 /**
  * Floor — including the TSL radial opacity technique explored in the lesson.
  */
+const textureLoader = new THREE.TextureLoader()
+const gltfLoader = new GLTFLoader()
+const floorTexture = textureLoader.load(`${import.meta.env.BASE_URL}floor-color.jpg`)
+floorTexture.colorSpace = THREE.SRGBColorSpace
+
 const floorMaterial = new THREE.MeshStandardNodeMaterial({
-    color: 0x241620,
-    roughness: 0.96,
+    map: floorTexture,
     transparent: true
 })
-floorMaterial.opacityNode = uv().sub(0.5).length().smoothstep(0.52, 0.25)
+floorMaterial.opacityNode = uv().sub(0.5).length().smoothstep(0.5, 0.2)
 
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), floorMaterial)
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), floorMaterial)
 floor.rotation.x = -Math.PI * 0.5
 floor.receiveShadow = true
 scene.add(floor)
@@ -187,160 +193,51 @@ const stars = new THREE.Points(
 scene.add(stars)
 
 /**
- * Original procedural forge
- *
- * Keeping the forge code-native makes the public project self-contained and
- * avoids redistributing any model or texture supplied by the course.
+ * Original lesson model
  */
-const forge = new THREE.Group()
-forge.rotation.y = -0.08
-scene.add(forge)
-
-const pedestalMaterial = new THREE.MeshStandardMaterial({
-    color: 0x7b3444,
-    emissive: 0x17060d,
-    emissiveIntensity: 0.55,
-    metalness: 0.22,
-    roughness: 0.68,
-    flatShading: true
-})
-const pedestalBandMaterial = new THREE.MeshStandardMaterial({
-    color: 0x33243f,
-    emissive: 0x08040f,
-    emissiveIntensity: 0.5,
-    metalness: 0.5,
-    roughness: 0.38
-})
-const anvilMaterial = new THREE.MeshStandardMaterial({
-    color: 0x56526f,
-    emissive: 0x0a0814,
-    emissiveIntensity: 0.65,
-    metalness: 0.52,
-    roughness: 0.38,
-    flatShading: true
-})
-
-const addForgeMesh = (geometry, material, position) =>
+const model = await gltfLoader.loadAsync(`${import.meta.env.BASE_URL}anvil.glb`)
+model.scene.traverse((child) =>
 {
-    const mesh = new THREE.Mesh(geometry, material)
-    mesh.position.copy(position)
-    mesh.castShadow = true
-    mesh.receiveShadow = true
+    if(!child.isMesh)
+        return
 
-    const edgeColor = material === anvilMaterial ? 0x8d79d6 : 0x9f5365
-    const edges = new THREE.LineSegments(
-        new THREE.EdgesGeometry(geometry, 28),
-        new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.22 })
-    )
-    mesh.add(edges)
-
-    forge.add(mesh)
-    return mesh
-}
-
-addForgeMesh(
-    new THREE.CylinderGeometry(1.34, 1.48, 0.34, 8),
-    pedestalMaterial,
-    new THREE.Vector3(0, 0.18, 0)
-)
-addForgeMesh(
-    new THREE.CylinderGeometry(1.2, 1.34, 0.34, 8),
-    pedestalMaterial,
-    new THREE.Vector3(0, 0.51, 0)
-)
-addForgeMesh(
-    new THREE.CylinderGeometry(1.28, 1.28, 0.11, 8),
-    pedestalBandMaterial,
-    new THREE.Vector3(0, 0.39, 0)
-)
-addForgeMesh(
-    new RoundedBoxGeometry(1.5, 0.24, 1.08, 4, 0.08),
-    anvilMaterial,
-    new THREE.Vector3(0.08, 0.78, 0)
-)
-addForgeMesh(
-    new RoundedBoxGeometry(0.76, 0.72, 0.72, 4, 0.13),
-    anvilMaterial,
-    new THREE.Vector3(0.08, 1.17, 0)
-)
-
-const shoulder = addForgeMesh(
-    new THREE.CylinderGeometry(0.64, 0.42, 0.42, 4),
-    anvilMaterial,
-    new THREE.Vector3(0.08, 1.53, 0)
-)
-shoulder.rotation.y = Math.PI * 0.25
-
-addForgeMesh(
-    new RoundedBoxGeometry(1.86, 0.28, 0.9, 4, 0.08),
-    anvilMaterial,
-    new THREE.Vector3(0.28, 1.78, 0)
-)
-
-const horn = addForgeMesh(
-    new THREE.ConeGeometry(0.44, 1.45, 8),
-    anvilMaterial,
-    new THREE.Vector3(-1.34, 1.78, 0)
-)
-horn.rotation.z = Math.PI * 0.5
-
-const bladeMaterial = new THREE.MeshPhysicalNodeMaterial({
-    color: 0x282337,
-    metalness: 0.62,
-    roughness: 0.27,
-    clearcoat: 0.35,
-    clearcoatRoughness: 0.24
+    child.castShadow = true
+    child.receiveShadow = true
 })
-const blade = addForgeMesh(
-    new RoundedBoxGeometry(1.48, 0.12, 0.34, 4, 0.035),
-    bladeMaterial,
-    new THREE.Vector3(0.12, 2.01, -0.03)
-)
-blade.rotation.y = -0.08
+scene.add(model.scene)
 
-const hammer = new THREE.Group()
-hammer.position.set(1.35, 2.03, -0.1)
-forge.add(hammer)
+const hammer = model.scene.getObjectByName('hammer')
+const blade = model.scene.getObjectByName('blade')
 
-const handleMaterial = new THREE.MeshStandardMaterial({ color: 0x5b2931, roughness: 0.7 })
-const hammerHeadMaterial = new THREE.MeshStandardMaterial({ color: 0x4a455f, metalness: 0.56, roughness: 0.34 })
-const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.078, 1.24, 10), handleMaterial)
-handle.position.y = 0.62
-handle.castShadow = true
-hammer.add(handle)
+if(!hammer || !blade)
+    throw new Error('The lesson anvil model is missing its hammer or blade mesh.')
 
-const hammerHead = new THREE.Mesh(new RoundedBoxGeometry(0.7, 0.3, 0.34, 4, 0.065), hammerHeadMaterial)
-hammerHead.position.y = 1.28
-hammerHead.castShadow = true
-hammer.add(hammerHead)
-
-for(const x of [-0.38, 0.38])
-{
-    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.115, 0.05, 12), pedestalBandMaterial)
-    cap.rotation.z = Math.PI * 0.5
-    cap.position.set(x, 1.28, 0)
-    cap.castShadow = true
-    hammer.add(cap)
-}
+hammer.rotation.reorder('YXZ')
+blade.material = new THREE.MeshPhysicalNodeMaterial().copy(blade.material)
 
 /**
- * Blade heat — local geometry position keeps the hottest area close to impact.
+ * Original lesson blade effect, driven by the game strikes.
  */
-const bladeHeat = uniform(0.2)
-const bladeImpact = uniform(0)
-const bladeColorCold = uniform(color(0x4b2c83))
-const bladeColorHot = uniform(color(0xff4f77))
-const bladeColorCore = uniform(color(0xffe0a0))
+const bladeEffectStrength = uniform(0)
+const bladeColorA = uniform(color(0xff007b))
+const bladeColorB = uniform(color(0xffb070))
+const bladeEmissiveStrength = uniform(1.5)
 
 blade.material.emissiveNode = Fn(() =>
 {
-    const distanceToImpact = positionGeometry.length()
-    const localImpact = bladeImpact.sub(distanceToImpact.mul(1.45)).max(0).pow(2)
-    const heatField = bladeHeat.mul(0.72).add(localImpact).max(0)
-    const hotColor = mix(bladeColorCold, bladeColorHot, heatField.smoothstep(0.08, 0.72))
-    const finalColor = mix(hotColor, bladeColorCore, heatField.smoothstep(0.72, 1.18))
+    const mask = grayscale(materialColor.rgb).remapClamp(0, 0.13, 1, 0)
+    const distanceToImpact = positionGeometry.sub(vec3(0, 0, 0.3)).length()
+    const effect = mask
+        .sub(distanceToImpact.mul(2))
+        .add(bladeEffectStrength)
+        .max(0)
+        .pow(2)
 
-    return mul(finalColor, heatField, 4.8)
+    return mul(
+        mix(bladeColorA, bladeColorB, effect),
+        effect,
+        bladeEmissiveStrength
+    )
 })()
 
 /**
@@ -442,7 +339,7 @@ const sparkExplosion = Fn(() =>
     const velocity = velocities.element(newIndex)
     const life = lives.element(newIndex)
 
-    position.assign(vec3(0.05, 2.06, -0.06))
+    position.assign(vec3(0.05, 1.95, -0.1))
 
     const angle = hash(newIndex).mul(TWO_PI)
     const direction = vec3(
@@ -483,7 +380,7 @@ const shockwaveMaterial = new THREE.MeshBasicMaterial({
     blending: THREE.AdditiveBlending
 })
 const shockwave = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.19, 64), shockwaveMaterial)
-shockwave.position.set(0.05, 2.08, -0.06)
+shockwave.position.set(0.05, 1.97, -0.1)
 shockwave.rotation.x = -Math.PI * 0.5
 scene.add(shockwave)
 let shockwaveLife = 1
@@ -590,7 +487,7 @@ const startGame = () =>
         cameraShake: 0
     })
 
-    bladeImpact.value = 0
+    bladeEffectStrength.value = 0
     forgeProgress.value = 0
     ui.startPanel.classList.add('is-hidden')
     ui.resultPanel.classList.add('is-hidden')
@@ -659,8 +556,8 @@ const strike = () =>
         rating = 'good'
 
     // Every player action drives the same audiovisual stack used in the lesson.
-    hammer.rotation.z = Math.PI * 0.5
-    bladeImpact.value = Math.min(1.4, bladeImpact.value + (rating === 'perfect' ? 0.72 : 0.48))
+    hammer.rotation.x = Math.PI * 0.5
+    bladeEffectStrength.value += 0.15
     impactLight.intensity += rating === 'perfect' ? 23 : 15
     state.cameraShake = rating === 'perfect' ? 1 : 0.62
     shockwaveLife = 0
@@ -806,9 +703,8 @@ const tick = () =>
     }
 
     // Frame-rate-independent easing returns the hammer to its rest pose.
-    hammer.rotation.z += -hammer.rotation.z * dt * 6.5
-    bladeImpact.value += -bladeImpact.value * dt * 2.35
-    bladeHeat.value += (state.heat / 100 - bladeHeat.value) * dt * 2.8
+    hammer.rotation.x += -hammer.rotation.x * dt
+    bladeEffectStrength.value += -bladeEffectStrength.value * dt * 0.5
     forgeProgress.value += (state.progress / 100 - forgeProgress.value) * dt * 2.4
     impactLight.intensity += (2.5 - impactLight.intensity) * dt * 8
 
